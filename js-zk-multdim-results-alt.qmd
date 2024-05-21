@@ -1,0 +1,638 @@
+---
+title: "Summary of the results"
+author: "John Skvoretz and Zbigniew Karpiński"
+format: 
+  pdf:
+    indent: true
+    keep-tex: true
+    include-in-header:
+      - text: |
+          \usepackage{booktabs}
+          \usepackage{dcolumn}
+          \usepackage{array}
+          \usepackage{icomma}
+          \usepackage{rotating}
+crossref: 
+  eq-prefix: ""
+editor: visual
+bibliography: /Users/zbigniewkarpinski/ReferencesMaster.bib
+biblio-style: https://raw.githubusercontent.com/citation-style-language/styles/master/american-sociological-association.csl
+link-citations: true
+abstract: We report on further developments in a research program to understand status allocation as mixture or compound of elementary allocation principles, specifically, the principles of meritocracy and lottery, formally introduced in Krauze and Słomczyński (1985). The meritocracy principle allocates persons from ranked origin categories that define different levels of “merit” to destination statuses such that higher ranking persons are assigned to higher destinations or to destinations equal in rank to that assigned to lower ranking persons. The lottery principle allocates persons to destination status by chance alone without reference their origin category. In previous work (Karpiński and Skvoretz 2023), we defined models for observed status allocation that proposed mixing coefficients that tune the contributions of meritocracy versus lottery but these models held for the case where only one dimension defined “merit.” Further developments in this paper consider how the analysis can be extended when multiple dimensions are used to define merit.
+---
+
+```{r}
+#| label: setup
+#| include: false
+
+library(tidyverse)
+library(knitr)
+library(reshape2)
+library(kableExtra)
+library(Hmisc)
+library(broom)
+library(texreg)
+library(cowplot)
+
+opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+knit_hooks$set(inline = function(x) prettyNum(x, big.mark = ","))
+options(digits = 2, knitr.kable.NA = '')
+source("status_allocation_functions.r")
+source("cmm2d-new-functions.R")
+```
+
+# Introduction
+
+Much research in the study of meritocracy has two weaknesses we seek to address. The first weakness is the absence of a formal definition of meritocracy as a principle in terms of what it implies for the allocation of status. Generally, meritocracy conveys the idea that persons are assigned positions in some ranked hierarchy of positions on the basis of their "merit", so that persons of higher merit are assigned to more valuable positions than persons of lower merit. Furthermore, it is generally assumed that "merit" is more or less defined by a person's level of educational attainment if the topic is societal level allocation of status (usually defined in occupational terms) or by a person's performance/achievements if the topic is intra-organizational allocation of status defined by positions in a command hierarchy. The second weakness arises in these examples and that is the focus on a single dimension of "merit" as the defining credential used to allocate status. That there may be multiple dimensions of "merit" and how they could be reconciled with one another when their implications for status allocation differ are unexplored topics for theoretical analysis.
+
+The absence of a formal definition impedes a quantitatively based understanding of meritocracy as a variable phenomenon. Without a formal definition, how much meritocracy exists at a particular time and how that quantity may vary over time or be trending up or down are questions left to common intuition and general opinion. The absence of a formal definition also impedes progress on the second problem, the understanding of meritocracy as potentially a multidimensional problem. The lack of attention is understandable because much work takes for granted the domination of meritocracy in contemporary social orders and on the basis of that, focuses attention on its consequences and political and social justice implications. Works by @markovits2019 and @sandel2020 are cases in point. The former argues that rising inequality in the USA has its genesis in the dominance of meritocracy and that this comes at a cost of long work weeks to those who benefit most. The latter draws a straight line from the dominance of meritocracy and those it leaves out to contemporary populist political movements leveraging the discontent of those left behind. Neither offers a fully formal definition of meritocracy, relying instead on intuitive understanding of the concept as do later commentators on these influential critiques [see, for example, the 2022 special issue of the journal *Theory and Research in Education* on Sandel's *The Tyranny of Merit* edited by @sardoc2022a].
+
+The hallmark of our work is a formal definition of meritocracy, first explicated in @krauze1985, which specifies the distribution of destination statuses (occupations or organizational positions) to persons in different ranked categories of merit under a fully meritocratic allocation. @karpinski2023 used this formal definition and its partner, the lottery principle of allocation, to analyze variation in meritocracy across time (1990s to present), space (nations), and population categories (males vs females and younger workers vs older workers), but their analysis was limited to only a single, albeit very important dimension of merit, educational attainment. In this paper we remove that limitation, derive theoretical consequences of the generalized model, and offer empirical analyses of multidimensional meritocratic status allocation in various nations at different points in time.
+
+## Related Research
+
+A brief examination of recent related research, both quantitative and qualitative, reinforces the introduction's main points: namely, the absence of a formal definition of meritocracy and lack of awareness of meritocracy as a multidimensional phenomena. On the quantitative side, @mun2021 examine merit vs non-merit reward systems, specifically seniority based reward systems, in Japanese firms and their impact on reward inequality by gender. Firms either have or do not have what the authors called a job-based pay system in which short term performance evaluations influence rewards. If a firm reports having such a system in The Japan Handbook for Job Seekers, it scores 1 on the key independent variable of having a merit based reward system. This identification clearly does not provide a formal definition of a meritocratic allocation of rewards but simply leverages commonsense understanding of such an allocation. The data they analyze comprise 400 firms and 400,000 employees over 12 years. Rewards include hourly wage, annual bonus, and annual earnings. Exhaustive analysis of gender inequality concludes that the merit system aggravates the gender gap in rewards for bonuses but not for hourly wage or annual earnings. The authors argue that it is reasonable to expect the effect on bonuses but not the other rewards because bonuses are more closely tie to short term performance than are base compensations. These findings hold net of various controls both individual and workplace level. They conclude that meritocracy may mask mechanisms that generate inequalities between population groups rather than a mechanism that itself reduces such inequalities, as it is often expected to do. Just this might occur could be substantially advanced with a formally clear understanding of how meritocratic reward allocation works.
+
+In another study on the effects of meritocracy in organisations, @castilla2010 demonstrated that managers in a company which includes meritocracy among its core values are more likely to favor male employees over equally qualified female ones than in one which does not explicitly adhere to meritocracy. Participants in the study were asked to play a role of managers in a fictitious company and evaluate a set of employee profiles. The contents of the profiles were experimentally manipulated in terms of (a) gender of the employees and (b) whether or not meritocracy was included among the company's core values. A primary concern of the study was with the extent to which the managers are more likely to give more favorable evaluations to male employees than to their female colleagues with the same qualifications depending on whether the company is presented as meritocratic or not. They found consistent evidence supporting the hypothesis that gender bias favoring man is more likely in companies which emphasise meritocracy. Here, meritocracy is operationalised simply as the company's declaration of adherence to certain rules implied by the principles of meritocracy, such as "raises and bonuses are based entirely on the performance of the employee" [see @castilla2010, p. 551]. In other words, the concern in this study was not with how employees in a company are actually rewarded and the extent to which the rewards system in the company aligns with the meritocratic ideal. Instead, the focus was on the consequences of the belief that a meritocratic reward system is actually in place.
+
+Research in the area of education also points out to the paradoxical effect of the application of the meritocratic principle on educational inequalities. Although school is often seen as an environment which exercises equality of opportunity and where students are rewarded solely for their effort and ability regardless of their social background, an emphasis on the meritocratic nature of school systems can reinforce achievement gaps rather than reducing them. @batruch2019 present an overview of relevant experimental studies which systematically demonstrate that applying the meritocracy principle to student evaluation and selection may actually harm learners from disadvantaged backgrounds. Again, the focus in these studies has been not so much on the degree to which schools actually are meritocracies, but on the effects that the belief that they are may have on (differences in) students' achievement.
+
+At the societal rather than organization level, recent quantitative research by @vannoord2019 adopts the common understanding in Western societies that merit is defined by educational qualifications which then form the basis for the allocation of status and power in society. Education legitimizes inequality in status and power to the extent it implements the meritocratic ideal, that is, "individuals gain their place in societal hierarchy through their merit" (p 649) rather than through ascription. The research questions addressed are how education relates to subjective social status, the extent to which this is seen as legitimate, and how these relationships may vary over nations. Data from the International Social Survey program on respondents education and attitudes are used to answer these questions. That education is a marker of merit is essential to the premise of the research. That there might be other dimensions of merit and a need for a principled way understanding merit as a multi-dimensional phenomena are not relevant questions for the inquiry. The authors find that (a) educational attainment is positively associated with subjective social status, (b) people of different levels of attainment have equally positive attitudes regarding education as a basis for social inequality; and (c) the strength and shape of the education and subjective social status relationship depends on the proportion of higher educated people in a society. While the focus on subjective social status is interesting, it is research that is tangential to our concern with formally modelling meritocratic allocation in a multidimensional context.
+
+A final example of related research, @friedman2023 uses qualitative methods -- in-depth interviews -- to assess how occupants of elite positions in the UK and Denmark account for their success as to due to merit in the form of innate talent and/or merit in the form of hard work. They find that UK elites attribute their advantaged position to talent such as excelling in creativity, good judgment, ability, etc. while Danish elites attribute their advantaged position to years of experience and hard work and their extraordinary work ethic. The authors account for this cross-national difference how elites are recruited to their positions, through elite private schools in the UK emphasizing the natural talent of their charges versus through elite employers in Denmark forging the link between achievement and hard work. It is interesting on elites, the top beneficiaries of the meritocratic allocation of status, but leaves open the larger question of the extent to which everyone, non-elites included, are indeed allocated meritocratically whether the operative merit dimension is defined in terms of innate talent, hard work, or some combination of the two. Addressing that larger question necessitates a clear understanding of what a meritocratic allocation looks like in contradistinction to an outcome driven by some other allocation principle.
+
+The absence of a rigorous definition of the meritocratic principle has not halted work of philosophical and ethical importance. @mijs2015 offers a compelling analysis of the dark side of meritocracy, arguing that its promise as "a workable and just principle for allocating reward and societal advancement" [-@mijs2015, p. 15] is in fact unfulfillable. Moreover, @mijs2015 contends that its use in educational institutions "risks crowding out ... the moral principles of equality and need" [-@mijs2015, p. 24; see also @bills2019 for a similar point]. Having problematized the meritocratic principle, Mijs proposes a research agenda that focuses on why citizens hold meritocratic beliefs, the failings of meritocracy in practice, the definition of merit as fundamentally a social construction rather than a distinction found in nature, and the impact of winning and losing in an ostensibly meritocratic system on individual citizens. In a review of recent work problematizing meritocracy, @sachs-cobbe2023 identifies two types of reform proposals such work offers: decrease the degree of meritocracy in our educational and economic institutions and/or decrease the important downstream consequences of the meritocratic policies of these institutions. In Sachs-Cobbe's distinction [-@sachs-cobbe2023, p. 181] between the descriptive and normative senses of meritocracy, the focus of the philosophical and ethical work is on meritocracy in the normative sense "an ideology that offers one particular justification for having institutions that are meritocratic in the descriptive sense." Thus, as important as this work is, it is orthogonal to our descriptive aim: to empirically assess the extent and variation in the degree to which meritocracy is actually used to allocate societal advancement.
+
+# Allocation Principles: Formally Defining Meritocracy
+
+We focus on two principles, the meritocratic principle and the lottery principle. The meritocratic principle defines how persons in ranked origin categories defined by levels of education should be allocated to ranked destination statuses defined as broad occupational categories if merit (higher or lower educational attainment) were the only consideration. Given a distribution of persons into origin categories and distribution of positions into destination statuses, the meritocratic allocation defines a unique joint distribution which satisfies the requirement that, for all pairs of persons differing in origin category, either both have the same destination status or the person from the higher ranked category has a higher ranked destination status. This allocation pattern contrasts with the lottery allocation in which origin categories are randomly assigned to destination statuses. @krauze1985 examine the extent to which an observed joint distribution or allocation of statuses to categories is more like the meritocratic distribution or the random lottery distribution. Later work by @kolczynska2019 and @matei2008 follows this template analyzing other data.
+
+Formally, the two allocation principles can be expressed as follows: let $a_{i,+}$ and $a_{+,k}$ be the $i^\mathrm{th}$ row and the $k^\mathrm{th}$ column marginals, with $a_{++}$ the table total. The lottery allocation is defined by the equation for each $ik$ table cell:
+
+$$
+l_{i,k} = \frac{a_{i,+} a_{+,k}}{a_{++}}
+$$ {#eq-lottery} which is the equation for stochastic independence. The meritocratic allocation begins with the rows ordered from most qualified to least qualified and the columns ordered from highest destination status from lowest destination status. The meritocratic allocation is determined sequentially starting with the first row and the first destination status as follows:
+
+$$
+m_{i,k} = \min\left(a_{i,+} - \sum_{w=0}^{k-1} m_{i,w}, a_{+,k} - \sum_{w = 0}^{i - 1} m_{w,k}\right)
+$$ {#eq-merit} setting $m_{i,0} = m_{0,k} = 0$ for simplicity of expression. Allocation by this sequential procedure ensures that a person with lower credentials is never found in a higher destination status than a person with higher credentials.
+
+@karpinski2023 develop theoretical models based on the idea that an observed allocation is a mixture of the two pure allocations, their proportions in the mixture governed by parameters called *mixing coefficients*. Their simpler model postulates a mixing coefficient that is constant across the origin categories, hence its name: *constant mixing coefficient*. It varies between 0 and 1 and the closer it is to the upper bound, the more the observed distribution approaches the ideal meritocratic distribution. The more complex model allows for the mixing coefficients to vary across the origin categories, hence its name: *differential mixing model*.
+
+@karpinski2023 describe how coefficients can be estimated from an observed joint distribution and then analyze cross-national and cross-temporal data drawn from Eurostat and IPUMs (Integrated Public Use Microdata Series) data sources for trends in meritocratic vs lottery allocation over time and across countries. In their analysis, they estimate these models for the status allocation of the total employed population, the total employed male population, the total employed female population and, for some cases, the total employed population of older individuals (40 years and above) and the total population of younger individuals (less than 40 years of age).
+
+One limitation of this work, which we address in this paper, is that the analysis is limited to one dimension of "merit" as the basis for allocation to destination statuses. This dimension in their analysis is always ranked educational categories. Realistically, societies may use multiple dimensions of "merit" in the allocation process, for instance, educational attainment and experience. Furthermore, since "merit" is a social construction, even in the case of educational attainment, as @offe1977 pointed out, virtually any differentiating factor, including categorical attributes such as gender, can be viewed as a dimension defining some categories as more meritorious than others. Ripe for such interpretation are diffuse status characteristics studied in expectation states theory [@berger2018].
+
+So the theoretical problem is to explore how multiple dimensions of "merit" can be combined into one overall theoretical picture of status allocation as a mixture of elementary allocation principles applied in a multidimensional context. To provide a test bed for ideas, we use educational categories and gender categories as the dimensions of interest and seek to understand how a unified analysis of the allocation of a population composed of both men and women who differ in their educational attainments can be systematically produced. We also use the data sets employed in @karpinski2023 for empirical grounding of the ideas.
+
+# Multidimensional Models
+
+In the case of a single dimension of merit, allocation according to meritocracy and allocation according to lottery define two reference distributions and the observed distribution is a mixture of the two. Our proposed generalization to multidimensional cases identifies combinations of these principles across dimensions. First, however, we must order the dimensions themselves to formulate a systematic and consistent extension of the principles to multiple dimensions. The ordering principle we adopted is the *lexicographic principle*. Its use in the context of stratification research was pioneered by Fararo and Kosaka [@fararo1970; @fararo2003]. In our context, the lexicographic principle is defined as follows: given $k$ ordered sets $\{X_1,\ldots,X_k\}$, the lexicographical order on the Cartesian product $X_{j_1}\times \ldots\times X_{j_k}$ where $\langle j_1,\ldots,j_k\rangle$ is a permutation of $\langle 1,\ldots, k\rangle$ defined as:
+
+```{=tex}
+\begin{multline}\label{eq-lexic}
+(x_{j_1}, \ldots, x_{j_k}) < (x_{j_1}^{\prime}, \ldots, x_{j_k}^{\prime})\iff\exists j_m, j_1 \leq j_m < j_k, \text{such that }\\ (x_{j_1}, \ldots, x_{j_m}) = (x_{j_1}^\prime, \ldots, x_{j_m}^{\prime}) \land x_{j_{m+1}} < x_{j_{m+1}}^{\prime}
+\end{multline}
+```
+Intuitively, joint state $\langle x\rangle$ ranks above joint state $\langle y\rangle$ when they are equal on the first $j_m$ dimensions from left to right, but differ on dimension $j_{m+1}$ in favor of $\langle x\rangle$'s value on that dimension.
+
+## The reference allocations
+
+The ordering of the dimensions provides a systematic way to calculate the reference distributions. We set out the procedure for two dimensions and indicate later how an extension to three or more dimensions can be made. For two dimensions, we identify four reference distributions: (*a*) meritocracy on the first dimension and then meritocracy on the second dimension; (*b*) meritocracy on the first and then lottery on the second; (*c*) lottery on the first and meritocracy on the second, and finally (*d*) lottery on the first followed by lottery on the second. We denote these reference distributions by $\langle M_xM_y\rangle$, $\langle M_xL_y\rangle$, $\langle L_xM_y\rangle$, and $\langle L_xL_y\rangle$, respectively. Ordering matters in the sense that the allocation on the second dimension is conditional on the allocation on the first dimension and so, in general, $\langle M_xL_y\rangle\neq \langle L_yM_x\rangle$.
+
+Let $i$ index the categories on the first dimension, $j$ the categories on the second dimension, and $k$ the destination statuses. Then, an element of the observed allocation is represented by $a_{ij,k}$, which is the number of persons in the joint origin category $ij$ that are found in destination status $k$. Then, $a_{++,k}$ is the number of persons in destination status $k$, $a_{i+,+}$ is the number of persons in origin category $i$, and $a_{+j,+}$ is the number of persons in origin category $j$. We let $\langle m_xm_y\rangle_{ij,k}$ denote the number of persons in the joint origin category $ij$ allocated to destination status $k$ in the $\langle M_xM_y\rangle$ reference distribution, $\langle m_xl_y\rangle_{ij,k}$ denote the number of persons in the joint origin category $ij$ allocated to destination status $k$ in the $\langle M_xL_y\rangle$ reference distribution, $\langle l_xm_y\rangle_{ij,k}$ denote the number of persons in the joint origin category $ij$ allocated to destination status $k$ in the $\langle L_xM_y\rangle$ reference distribution, and $\langle l_xl_y\rangle_{ij,k}$ denote the number of persons in the joint origin category $ij$ allocated to destination status k in the $\langle L_xL_y\rangle$ reference distribution.
+
+```{=tex}
+\begin{subequations}\label{tbl-frm-step-1}
+\begin{align}
+\langle m_x m_y\rangle_{i+,k} &= \displaystyle\min\biggl(a_{i+,+} - \sum_{w=0}^{k-1}\langle m_x m_y\rangle_{i+,w}, a_{++,k} - \sum_{w=0}^{i-1}\langle m_x m_y\rangle_{w+,k}\biggr)\\
+\langle m_x l_y\rangle_{i+,k} &= \displaystyle\min\biggl(a_{i+,+} - \sum_{w=0}^{k-1}\langle m_x l_y\rangle_{i+,w}, a_{++,k} - \sum_{w=0}^{i-1}\langle m_x l_y\rangle_{w+,k}\biggr)\\
+\langle l_x m_y\rangle_{i+,k} &= \displaystyle\frac{a_{i+,+}a_{++,k}}{a_{++,+}}\\
+\langle l_x l_y\rangle_{i+,k} &= \displaystyle\frac{a_{i+,+}a_{++,k}}{a_{++,+}}
+\end{align}
+\end{subequations}
+```
+```{=tex}
+\begin{subequations}\label{tbl-frm-step-2}
+\begin{align}
+\langle m_x m_y\rangle_{ij,k} &= \displaystyle\min\biggl(a_{ij,+} - \sum_{w=0}^{k-1}\langle m_x m_y\rangle_{ij,w}, \langle m_x m_y\rangle_{i+,k} - \sum_{w=0}^{j-1}\langle m_x m_y\rangle_{iw, k}\biggr)\\
+\langle m_x l_y\rangle_{ij,k} &= \displaystyle\frac{\langle m_x l_y\rangle_{i+,k}a_{ij,+}}{\langle m_x l_y\rangle_{i+,+}}\\
+\langle l_x m_y\rangle_{ij,k} &= \displaystyle\min\biggl(a_{ij,+} - \sum_{w=0}^{k-1}\langle l_x m_y\rangle_{ij,w}, \langle l_x m_y\rangle_{i+,k} - \sum_{w=0}^{j-1}\langle l_x m_y\rangle_{iw,k}\biggr)\\
+\langle l_x l_y\rangle_{ij,k}&= \displaystyle\frac{\langle l_x l_y\rangle_{i+,k} a_{+j,+}}{a_{++,+}} = \frac{a_{i+,+}a_{++,k}}{a_{++,+}}\cdot\frac{a_{+j,+}}{a_{++,+}}
+\end{align}
+\end{subequations}
+```
+Equations \eqref{tbl-frm-step-1} and \eqref{tbl-frm-step-2} provide formulas for the derivation of the referent allocations in the case of two merit dimensions, the former equation referring to the first step of the calculation and the latter to the second step. (In all the formulas, terms with subscript(s) 0 are set to 0 for simplicity of expression.) In general, our proposed approach consists in applying the allocation principle of interest (i.e., meritocracy or lottery) to the primary dimension, while temporarily ignoring the secondary once. Once the allocation has been completed, the outcome sets the constraint for the allocation with respect to the secondary dimension. For instance, if the primary merit dimension is education, while the secondary dimension is gender, and we want to derive the $\langle M_x M_y\rangle$ allocation, we begin by calculating the purely meritocratic allocation with respect to education, ignoring gender categories. Once this has been done, we know, for instance, the number of people with tertiary education in each destination status. In the next step, these numbers, combined with the number of men and women with tertiary education, sets the constraints for meritocratic allocation with respect to gender within the category of tertiary education. Similar steps are repeated for the remaining education categories. Importantly, this approach can be generalized to situations in which there are more than 2 dimensions: allocation with respect to dimension $g$ is executed after, and conditional on the outcome of, allocations with respect to the $g - 1$ dimensions preceding it in the lexicographic ordering. Appendix A walks through an example to illustrate how these expressions are used.
+
+## Modelling the outcome allocation
+
+Now that these reference distributions are defined, we consider how they can be combined to model an observed allocation. We propose a constant mixing model and a differential mixing model that parallel the models proposed by @karpinski2023.
+
+The constant mixing model proposes two mixing coefficients, $\alpha$ for the higher priority dimension and $\beta$ for the lower priority dimension, subject to the constraint $0\leq\alpha,\beta\leq 1$. Each of these can be thought of as a probability that allocation along its dimension is made meritocratically while $1 - \alpha$ and $1 - \beta$ are the probabilities that the allocation is made by lottery. Then, the constant mixing model is defined by the following equation that specifies the expected allocation $p_{ij,k}$ given the values of the mixing coefficients:
+
+$$
+p_{ij,k}= \alpha\beta\langle m_x m_y\rangle_{ij,k} + \alpha(1 - \beta)\langle m_x l_y\rangle_{ij,k} + (1 - \alpha)\beta\langle l_x m_y\rangle_{ij,k} + (1 - \alpha)(1 - \beta)\langle l_x l_y\rangle_{ij,k}
+$$ {#eq-const}
+
+This model has two parameters, the mixing coefficients, that need to be estimated from the observed data.
+
+The differential mixing model allows each dimension to be characterized by a vector of coefficients, $\langle\alpha_1,\ldots,\alpha_I\rangle$ and $\langle\beta_1,\ldots,\beta_J\rangle$, one for each origin category along the first and second dimensions. The coefficient $\alpha_i$ can be thought of as the probability that the allocation of origin category $i$ on the first dimension is made by merit and $1 - \alpha_i$ as the probability that it is made by lottery, while the coefficient $\beta_j$ is the probability that the allocation of origin category $j$ on the second dimension is made by merit and $1 - \beta_j$ is the probability that it is made by lottery. However, in order that the overall marginal distribution to destination statuses is fit, the equation for the expected allocation $p_{ij,k}$ must contain a vector of adjustment proportions, one per destination status, denoted $t_k$.
+
+```{=tex}
+\begin{multline}\label{eq-diff}
+p_{ij,k} = 
+  \alpha_i\beta_j\langle m_x m_y\rangle_{ij,k} + 
+  \alpha_i(1 - \beta_j)\langle m_x l_y\rangle_{ij,k} + 
+  (1 - \alpha_i)\beta_j\langle l_x m_y\rangle_{ij,k} + \\
+  (1 - \alpha_i)(1 - \beta_j)\langle l_x l_y\rangle_{ij,+}t_k
+\end{multline}
+```
+where
+
+$$
+t_k = \frac{\displaystyle a_{+,k} - \sum_i^I\sum_j^J\alpha_i\beta_j\langle m_x m_y\rangle_{ij,k} - \sum_i^I\sum_j^J\alpha_i(1 - \beta_j)\langle m_x l_y\rangle_{ij,k} -\sum_i^I\sum_j^J(1 - \alpha_i)\beta_j\langle l_x m_y\rangle_{ij,k}}{\displaystyle\sum_i^I\sum_j^J(1 - \alpha_i)(1 - \beta_j)a_{ij,+}}
+$$
+
+The adjustment proportion for destination status $k$ has an interpretation as the probability an individual is allocated to that destination given that allocation is driven by lottery on both dimensions. Note that these proportions do not introduce any additional parameters. The differential model, therefore, has $I + J$ parameters to be estimated from the observed data.
+
+Estimation of parameters follows the practice set out in @karpinski2023. We minimize the norm of the difference matrix $$
+  \lVert\mathbf{A} - \mathbf{P}\rVert = \sqrt{\sum_i^I\sum_j^J\sum_{k}^K (a_{ij,k} - p_{ij,k})^2},
+$$ {#eq-distance} where $\mathbf{A}$ is the observed status allocation, while $\mathbf{P}$ denotes the model predicted one. Further, we use the index of dissimilarity as a heuristic measure of fit: $$
+\Delta = \frac{\sum_i^I\sum_j^J\sum_k^K\vert a_{ij,k} - p_{ij,k}\vert}{2 a_{++,+}}.
+$$ {#eq-dissim}
+
+The index of dissimilarity has an interpretation in terms of the proportion of all cases which would have to be re-allocated for the model-predicted allocation to match the observed one. Thus, lower values of the index indicate better fit.
+
+## Empirical example
+
+To illustrate these ideas, we return to the original data source that @krauze1985 used for their illustrations: @labor1977. It has separate allocation tables for males and females for five origin categories of educational attainment and four destination statuses. @tbl-krauze presents this two-dimensional allocation: educational attainment is the primary dimension with the typical ranking of attainment categories, and gender is the secondary dimension, but with the female category ranked above the male category.
+
+```{r}
+#| label: tbl-krauze
+#| tbl-cap: Observed allocation of US labor force by education and gender, 1977
+#| results: asis
+
+# A tibble with the original data ----
+
+t1 <- matrix(c(4051, 1044, 299, 38, 7832, 1341, 845, 239, 1536, 3222, 1088, 131, 3031, 1738, 3386, 578, 1898, 8640, 5051, 589, 3257, 2503, 11080, 2010, 356, 1606, 3160, 601, 725, 693, 5526, 1430, 98, 325, 1846, 457, 452, 252, 3885, 1402), ncol = 4, byrow = TRUE)
+
+dimnames(t1) <- list(
+  origin = paste(rep(paste0("E", 1:5), each = 2), 
+                 rep(c("F", "M"), times = 5), sep = "-"),
+  status = paste0("S", 1:4)
+)
+
+t1 <- t1 |>
+  melt(value.name = "freq", varnames = c("origin", "status")) |>
+  separate_wider_delim(cols = origin, names = c("degree", "sex"), delim = "-", 
+                       cols_remove = FALSE)
+
+# Reference allocations
+
+t1_ref <- stall2d(d = t1, dim1 = "degree", dim2 = "sex", status = "status", f = "freq")
+
+t1_diss <- map_dbl(.x = t1_ref[-1], .f = ~sum(abs(t1_ref[[1]] - .))/(2 * sum(.)))
+t1_dist <- map_dbl(.x = t1_ref[-1], .f = ~norm(t1_ref[[1]] - ., type = "F"))
+
+t1_ref_alt <- t1 |> 
+  mutate(sex2 = fct_relevel(sex, "M")) |> 
+  stall2d(dim1 = "degree", dim2 = "sex2", status = "status", f = "freq")
+
+t1_diss_alt <- map_dbl(.x = t1_ref_alt[-1], .f = ~sum(abs(t1_ref_alt[[1]] - .))/(2 * sum(.)))
+t1_dist_alt <- map_dbl(.x = t1_ref_alt[-1], .f = ~norm(t1_ref_alt[[1]] - ., type = "F"))
+
+# A matrix of observed counts
+
+latex(addmargins(t1_ref[[1]]), file = "", title = "", cgroup = c("Status", ""), n.cgroup = c(4, 1), rgroup = c("Origin", ""), n.rgroup = c(10, 1), big.mark = ",", booktabs = TRUE, insert.bottom = "\\medskip\\footnotesize{\\emph{Destination statuses} S1: Professional, technical and kindred workers; Managers and administrators, except farm; S2: Sales workers; Clerical and kindred workers; S3: Craft and kindred workers; Operatives, except transport; Transport equipment operatives; Service workers, except household; S4: Laborers, except farm; Farm workers; Private household workers. \\emph{Educational levels} E1: College, 4 years or more; E2: College, 1-3 years; E3: High school, 4 years; E4: High school, 1-3 years; E5: Elementary school, 8 years or less. \\emph{Genders}  M: Male; F: Female.}", table.env = FALSE)
+```
+
+@tbl-refalls displays the four reference allocations. Even a cursory look makes it clear how different they are from each other and how they depart from the observed allocation in @tbl-krauze. To describe these differences in a more systematic manner, let us compare the distances separating the allocations. As mentioned above, the distance between two allocations is equal to the norm of their difference, as defined by (@eq-distance). By this measure, the distance separating the observed allocation from allocations $\langle M_xL_y\rangle$ or $\langle L_xL_y\rangle$ (`r t1_dist_alt[2]` and `r t1_dist_alt[4]`, respectively), which assume lottery with respect to gender, is considerably smaller than the distance separating the observed distribution from $\langle M_xM_y\rangle$ or $\langle L_xM_y\rangle$ (`r t1_dist_alt[1]` and `r t1_dist_alt[3]`, respectively), in which the allocation by gender is assumed to be meritocratic. Interestingly, of the four reference distributions, $\langle L_xL_y\rangle$ is the closest to the observed allocation, while $\langle M_xM_y\rangle$ the furthest from it.
+
+```{r}
+#| label: tbl-refalls
+#| tbl-cap: Reference allocations for the observed allocation in @tbl-krauze
+#| tbl-subcap: 
+#|   - allocation \\(\\langle M_xM_y\\rangle\\)
+#|   - allocation \\(\\langle M_xL_y\\rangle\\)
+#|   - allocation \\(\\langle L_xM_y\\rangle\\)
+#|   - allocation \\(\\langle L_xL_y\\rangle\\)
+#| layout-ncol: 2
+
+kable(t1_ref[[2]], booktabs = TRUE, linesep = "", format.args = list(big.mark = ","))
+kable(t1_ref[[3]], booktabs = TRUE, linesep = "", format.args = list(big.mark = ","))
+kable(t1_ref[[4]], booktabs = TRUE, linesep = "", format.args = list(big.mark = ","))
+kable(t1_ref[[5]], booktabs = TRUE, linesep = "", format.args = list(big.mark = ","))
+```
+
+The next step in the analysis consists in estimating the parameters of our two status allocation models and assessing their fit to @tbl-krauze by searching for the values of the parameters (i.e., mixing coefficients) which minimise the distance between the observed and the model-predicted allocation. To that end, we make use of the `optim()` routine in R [@r]. Again, the distance is measured as the norm of the difference between the observed and the predicted allocations. The result of the estimation is shown in @tbl-mparam. The table is split into two "panels", the left one showing the estimates and fit statistics for the constant mixing model and the right one for the differential mixing model. Also, while our focus is on the analysis and interpretation of two-dimensional models, in which education and gender operate jointly as bases for status allocation, we compare them with single-dimensional ones, which consider each characteristic separately.
+
+```{r}
+#| label: tbl-mparam
+#| tbl-cap: Results from the status allocation model for the observed allocation in @tbl-krauze
+
+# One-dimensional models ----
+
+# Education-based meritocracy ----
+
+# Constant mixing
+
+t1_cmm_edu <- xtabs(freq ~ degree + status, data = t1) |>
+  mar() |>
+  merit1()
+
+# Differential mixing
+
+t1_dmm_edu <- xtabs(freq ~ degree + status, data = t1) |>
+  mar() |>
+  merit2()
+
+# Adjustment proportions 
+
+t1_obs_edu <- xtabs(freq ~ degree + status, data = t1)
+alpha_edu <- t1_dmm_edu$`Mixing coefficient`$Estimate
+adp_edu <- (colSums(t1_obs_edu) - colSums(alpha_edu * mar(t1_obs_edu)[[2]]))/sum((1 - alpha_edu) * rowSums(t1_obs_edu))
+
+# Gender-based meritocracy ----
+
+# Constant mixing
+
+t1_cmm_sex <- xtabs(freq ~ sex + status, data = t1) |>
+  mar() |>
+  merit1()
+
+# Differential mixing
+
+t1_dmm_sex <- xtabs(freq ~ sex + status, data = t1) |>
+  mar() |>
+  merit2()
+
+# Adjustment proportions 
+
+t1_obs_sex <- xtabs(freq ~ sex + status, data = t1)
+alpha_sex <- t1_dmm_sex$`Mixing coefficient`$Estimate
+adp_sex <- (colSums(t1_obs_sex) - colSums(alpha_sex * mar(t1_obs_sex)[[2]]))/sum((1 - alpha_sex) * rowSums(t1_obs_sex))
+
+# Two-dimensional merit model ----
+
+# Status allocations
+
+t1_stall2d <- t1 |>
+  stall2d(dim1 = "degree", dim2 = "sex", status = "status", f = "freq")
+
+# Constant mixing
+t1_cmm2d <- cmm2d(dat = t1_stall2d)
+
+# Differential mixing
+
+t1_dmm2d <- dmm2d(dat = t1_stall2d)
+
+# Estimates of model parameters ----
+
+tbl_params <- tibble(
+  cmmedu1 = c(t1_cmm_edu$`Mixing coefficient`$Estimate, rep(NA, 10), 
+              t1_cmm_edu$`Dissimilarity index`),
+  cmmsex1 = c(rep(NA, 5), t1_cmm_sex$`Mixing coefficient`$Estimate, rep(NA, 5),
+              t1_cmm_sex$`Dissimilarity index`),
+  cmm2d = c(t1_cmm2d$`Mixing coefficient`$Estimate[1], rep(NA, 4), 
+            t1_cmm2d$`Mixing coefficient`$Estimate[2], NA, rep(NA, 4),
+            t1_cmm2d$`Dissimilarity index`),
+  term = c(paste0("E", 1:5), "Female", "Male", paste0("S", 1:4), NA),
+  dmmedu1d = c(t1_dmm_edu$`Mixing coefficient`$Estimate, rep(NA, 2), adp_edu,
+               t1_dmm_edu$Distance),
+  dmmsex1d = c(rep(NA, 5), t1_dmm_sex$`Mixing coefficient`$Estimate, adp_sex,
+               t1_dmm_sex$Distance),
+  dm2d = c(t1_dmm2d$`Mixing coefficient`$estimate, 
+           t1_dmm2d$`Adjustment proportions`, t1_dmm2d$`Dissimilarity index`)
+) 
+
+tbl_params |>
+  kable(digits = c(2, 2, 2, NA, 2, 2, 2), format = "latex",
+        col.names = c("Education", "Gender", "Two dims", "", 
+                      "Education", "Gender",
+                      "Two dims"), booktabs = TRUE) |>
+  kable_styling() |>
+  row_spec(7, hline_after = TRUE) |>
+  row_spec(11, hline_after = TRUE) |>
+  add_header_above(c("Constant mixing" = 3, "Differential mixing" = 4)) |>
+  pack_rows("Mixing coefficients", 1, 7) |>
+  pack_rows("Adjustment proportions", 8, 11) |>
+  pack_rows("Dissimilarity index", 12, 12)
+```
+
+In the case of the constant models, the mixing coefficients on education in the single- and two-dimensional models are the same. As for gender, however, the two-dimensional model and the relevant single-dimensional model yield considerably different estimates, `r t1_cmm2d[[1]]$Estimate[2]` and `r t1_cmm_sex[[1]]$Estimate`, respectively. A similar pattern concerning gender is found in the results from the differential models. In addition, while the estimated mixing coefficients for men and women in the single-dimensional model are the same, they differ slightly in the case of the two-dimensional one, although the difference is not very large.
+
+The mixing coefficients for the education categories vary considerably in the differential mixing models, the top educational category having the greatest coefficient and the bottom category having the smallest one. Both the two-dimensional differential mixing model and the relevant single-dimensional one imply that allocations of those with the highest educational credentials are driven by meritocracy about 70% of the time, while the corresponding figure for those with the lowest credentials is below 15%. The two models differ, however, with respect to the estimates of the mixing coefficient in the three middle categories, especially categories E2 and E3.
+
+There are also differences across the three variants of the differential model with respect to the adjustment proportions. For example, in the single-dimensional model of education-based status allocation, the adjustment proportion for destination status S3 is 0.46, meaning that, if allocated by lottery, people are expected to end up in that status 46% of the time. In the two-dimensional model, the corresponding figure is 35%. All in all, the latter model predicts the allocations by lottery to be more evenly distributed among the destination statuses than the single-dimensional models.
+
+Finally, let us compare the models in terms of how well they fit the data. To that end, we use the values of the dissimilarity index shown at the bottom of @tbl-mparam. With the exception of the single-dimensional models for gender-based status allocation, the differential model performs consistently better than its constant counterpart. Further, it might seem that the simpler single-dimensional model outperforms the more complex two-dimensional one. But such a conclusion would be incorrect, as the order of the status allocation matrix differs across the variants. In the current example, the one-dimensional model of education-based status allocation uses a matrix of order $5\times 4$; the one-dimensional model of gender-based allocation uses a matrix of order $2\times 4$, while the two-dimensional model uses a matrix of order $10\times 4$. Values of the dissimilarity index for tables of different orders are not directly comparable. For this reason, we restrict comparisons of fit to constant and differential models of the same dimensions.
+
+# Data
+
+Our analyses are based on information provided by the Eurostat. The specific dataset that we use is `lfsa_egised`, which reports counts (denominated in 1,000s) of employees by age category, gender, occupation, and educational attainment level for each country and year combination [@lfsa-egised-2024-4-24]. The counts are reported for three levels of education and for nine categories of occupation for men and women separately and together. Since the data come in the form of aggregate statistics, rather than original microdata, the usual data manipulation and transformation techniques (e.g., recoding of the educational categories or replacing one measure of educational attainment with another one) are not applicable to it. For the same reason, the set of variables included in these tables is very limited. For instance, family background variables, such as parental occupation and education, are not provided.
+
+Overall, there are 36 unique countries and years of consecutive data vary by country, with the earliest year being 1992 and the latest 2023, yielding 927 unique country-year combinations.[^1] In terms of age, we focus on individuals aged 15 or older. The dataset distinguishes three categories of education labelled "ED0-2," "ED3-4," and "ED8-5." These labels derive from the International Standard Classification of Education 2011 (ISCED11), so that the first category comprises individuals with ISCED11 levels 0 through 2 (lower secondary education or below); the second category comprises individuals with ISCED11 levels 3 and 4 (upper secondary education or post-secondary non-tertiary education); and the third category includes all individuals with tertiary education, that is, with ISCED11 levels 5 through 8. In the remainder of the paper, we refer to the three categories --- ED0-2, ED3-4, and ED5-8 --- as "low," "medium," and "high," respectively.
+
+[^1]: Specifically the years and number of countries for which data are available are: 1992 (9); 1993-1994 (11); 1995 (12); 1996 (16); 1997-1998 (22); 1999 (28); 2000-2001 (30); 2002-2005 (31); 2006-2009 (33); 2010-2012 (34); 2013-2019 (35); 2020 (34); 2021-2023 (33).
+
+As for occupation, eleven categories are distinguished in the Eurostat data: OC0 through OC9 and an additional category for nonresponse (NRP). The categories correspond to major occupational groups in the International Standard Classification of Occupation 2008 (ISCO08) classification. We drop categories OC0 (representing Armed Forces occupations) and NRP and group the remaining nine into four broad destination statuses: categories OC1 through OC3 are group into the top status, which labels with "S1"; categories OC4 and OC5 into "Upper middle" status, labeled "S2"; categories OC6 and OC7 into "Lower middle" status, "S3"; and the last two categories into "Low" status, "S4".
+
+```{r}
+#| cache: true
+
+load("js-zk-multdim-estat-results.RData")
+
+t1 <- t1 |>
+  mutate(tb1ded_prm = map(tb1ded, 
+                          ~list(hml = .,
+                                hlm = .[c(1, 3, 2), ],
+                                mhl = .[c(2, 1, 3), ],
+                                mlh = .[c(2, 3, 1), ],
+                                lhm = .[c(3, 1, 2), ],
+                                lmh = .[3:1, ])),
+         sa1ded_prm = map(tb1ded_prm, ~map(., mar)),
+         cm1ded_prm = map(sa1ded_prm, ~map(., merit1)),
+         dm1ded_prm = map(sa1ded_prm, ~map(., merit2)))
+
+t1 <- t1 |>
+  mutate(cm1ded_prm = map(cm1ded_prm, ~map_df(., ~.[[3]])),
+         dm1ded_prm = map(dm1ded_prm, ~map_df(., ~.[[4]])))
+
+t1 <- t1 |>
+  mutate(tb1dsx_prm = map(tb1dsx, 
+                          ~list(
+                            f = .,
+                            m = .[2:1, ]
+                          )),
+         sa1dsx_prm = map(tb1dsx_prm, ~map(., mar)),
+         cm1dsx_prm = map(sa1dsx_prm, ~map(., merit1)),
+         dm1dsx_prm = map(sa1dsx_prm, ~map(., merit2)))
+
+t1 <- t1 |>
+  mutate(cm1dsx_prm = map(cm1dsx_prm, ~map_df(., ~.[[3]])),
+         dm1dsx_prm = map(dm1dsx_prm, ~map_df(., ~.[[4]])))
+
+cm1ded_prm <- t1 |>
+  select(year, cnt, cm1ded_prm) |>
+  unnest(cols = cm1ded_prm)
+
+cm1dsx_prm <- t1 |>
+  select(year, cnt, cm1dsx_prm) |>
+  unnest(cols = cm1dsx_prm)
+
+dm1ded_prm <- t1 |>
+  select(year, cnt, dm1ded_prm) |>
+  unnest(cols = dm1ded_prm)
+
+dm1dsx_prm <- t1 |>
+  select(year, cnt, dm1dsx_prm) |>
+  unnest(cols = dm1dsx_prm)
+
+ed_prm <- bind_rows(cm1ded_prm, dm1ded_prm, .id = "model") |>
+  pivot_longer(cols = 4:9) 
+
+sx_prm <- bind_rows(cm1dsx_prm, dm1dsx_prm, .id = "model") |>
+  pivot_longer(cols = 4:5)
+```
+
+# Results
+
+Let us begin the review of the results by comparing different specifications of single-dimensional models of education-based and gender-based status allocation in terms of how well they fit the data. The specifications differ in the ordering of the origin categories. As regards education, the ordering is generally well-established: higher levels of education are seen as more meritorious and therefore more deserving of status. Consequently, one can expect that a model of education-based status allocation which assumes the "default" ranking of educational categories, with high ranked over medium and medium over low (or $H>M>L$ for short) will fit the data better than a model assuming alternative rankings. This expectation is confirmed by @fig-spec (left panel) which compares fit statistics for models of education-based status allocation with different orderings of the origin categories. With three categories of education, there are 6 distinct ways to order them. For each ordering, we fit the single-dimensional model of status allocation. As previously, we use the index of dissimilarity to measure its fit. Given that there are `r nrow(t1)` country-year combinations in our data, rather than plotting a separate point for each of them, @fig-spec uses box-and-whiskers plots to summarise the distributions of the values of the dissimilarity index.
+
+```{r}
+#| label: fig-spec
+#| fig-cap: Comparison of the goodness of fit of various specifications of the status allocation models
+#| dev: tikz
+#| fig-width: 7
+#| fig-height: 5
+#| out-width: "0.8\\linewidth"
+
+ed_prm <- ed_prm |>
+  mutate(name = factor(name, 
+                       levels = c("hml", "hlm", "mhl", "mlh", "lhm", "lmh"),
+                       labels = c("$H>M>L$", "$H>L>M$", "$M>H>L$", "$M>L>H$", "$L>H>M$", "$L>M>H$")),
+         model = factor(model, levels = 1:2, labels = c("Constant", "Differential"))) 
+
+sx_prm <- sx_prm |>
+  mutate(name = factor(name, 
+                       levels = c("f", "m"),
+                       labels = c("$F > M$", "$M > F$")),
+         model = factor(model, levels = 1:2, labels = c("Constant", "Differential"))) 
+  
+bind_rows(ed_prm, sx_prm, .id = "dim") |>
+  mutate(dim = factor(dim, levels = 1:2, labels = c("Education", "Gender"))) |>
+  ggplot(mapping = aes(x = name, y = value, colour = model)) + 
+  geom_boxplot() + 
+  facet_grid(~dim, scales = "free_x", space = "free_x") + 
+  theme_minimal() + 
+  theme(legend.position = "top", 
+        strip.text = element_text(face = "bold", size = 12)) +
+  scale_colour_manual(values = c("#d73027", "#4575b4")) + 
+  labs(x = NULL, y = "Dissimilarity index", colour = "Model")
+
+```
+
+The dissimilarity index measures how much the model-predicted allocation deviates from the observed one. The further the deviation, the poorer is the model fit, which is reflected in a higher value of the index. From that perspective, the single-dimensional model of education-based status allocation assuming the default ordering outperforms its alternatives assuming a different ordering: the fit statistics for the former are lower, on average, than for any of its alternatives. For instance, the median value of the dissimilarity index for the former model, taken over all `r nrow(t1)` country-year combinations, is equal to `r ed_prm |> filter(model == "Constant", name == "$H>M>L$") |> pull(value) |> median()` in the case of constant mixing and to `r ed_prm |> filter(model != "Constant", name == "$H>M>L$") |> pull(value) |> median()` in the case of differential mixing. This is to say that the models assuming the standard ordering of educational levels misallocate individuals to destination statuses `r ed_prm |> filter(model == "Constant", name == "$H>M>L$") |> pull(value) |> median() * 100`% and `r ed_prm |> filter(model != "Constant", name == "$H>M>L$") |> pull(value) |> median() * 100`% of the time, respectively. If we assume any other ordering of the education levels, we end up with considerably higher percentages of misallocated cases. Thus, the default ordering is preferred also because it results in the best fit to the data.
+
+The right panel of @fig-spec shows the results of a similar exercise done for gender. With two gender categories, there are 2 possible orderings: women over men (or $F > M$ for short) and men over women (or $M > F$). Again, for each ordering, we fit the single-dimensional model, both constant and differential, of gender-based status allocation to our data and calculate the dissimilarity index as our measure of fit. Finally, we summarise the distributions of the fit measure over all country-year combination to compare how models assuming the different ranking of gender categories fare against observation. As we can see, the specification assuming that men are ranked over women fits the data worse than the alternative specification: on average, the dissimilarity index is higher for the former than for the latter both in case of the constant and differential mixing model. Consequently, we assume that women are ranked above men, even though such ordering appears at odds with existing research: setting women to be the higher ranking category implies that women are the more meritorious category, or more deserving of status. This proposition is perhaps counterintuitive and at odds with literature on gender stratification and gender inequality, which suggests that women are more disadvantaged on the labour market than men. A substantial body of research within the expectation states and status characteristics tradition [@berger2018; @webster2016] also suggests that gender functions as a status characteristic in many social situations, with men assumed to be more competent and, generally, more worthy of recognition and deference than women. We discuss these points in more detail later on. For now, let us observe that ranking women over men in our analysis produces a somewhat better fit to the data than the reverse ordering.
+
+Moving on, for each country-year combination in our data, we build a status allocation table with education and gender as bases of status allocation, education being the primary one. In building the tables, we assume the ordering of education and gender categories which is consistent with the results of @fig-spec. Then, for each observed status allocation, we can derive the four reference allocations, as defined by Equations \eqref{tbl-frm-step-1} and \eqref{tbl-frm-step-2}. @fig-distances compares distances between the observed allocation and the reference ones. As previously, we use the norm of the difference matrix to measure the distance. Because the population sizes vary across countries and over time, we standardise the norm by the table total to make the results comparable. For example, the standardised distance between the observed allocation and some reference allocation $\mathbf{R}$ is equal to:
+
+$$
+\lVert\mathbf{A}-\mathbf{R}\rVert_{std} = \frac{\lVert\mathbf{A}-\mathbf{R}\rVert}{a_{++,+}}
+$$ Standardised distance is bounded between 0 and 1, with lower values indicating shorter distances. As we can see, the allocations $\langle M_xL_y\rangle$ and $\langle L_xL_y\rangle$ are much closer to the observed allocation, on average, than $\langle M_xM_y\rangle$ and $\langle L_xM_y\rangle$. Allocation $\langle M_xL_y\rangle$ is the closest to the observed one, while $\langle L_xM_y\rangle$ is the furthest.
+
+```{r}
+#| label: fig-distances
+#| fig-cap: Distances between the observed allocation and the reference ones
+#| dev: tikz
+#| fig-width: 6
+#| fig-height: 4
+#| out-width: "0.8\\linewidth"
+
+t1 <- t1 |>
+  mutate(dist = map(.x = sa2d, .f = ~map2(.x = .[1], 
+                                              .y = .[-1], 
+                                              .f = ~norm(.x - .y, type = "f")/sum(.x))))
+
+t1 <- t1 |>
+  mutate(dist = map(.x = dist, .f = unlist),
+         dist = map_df(.x = dist, 
+                       .f = ~tibble(AM = .[1], AU = .[2], AV = .[3], AL = .[4]))) |>
+  unnest(cols = dist)
+
+t1 |>
+  select(year, cnt, AM, AU, AV, AL) |>
+  pivot_longer(starts_with("A")) |>
+  mutate(name = factor(name, levels = c("AM", "AU", "AV", "AL"))) |>
+  ggplot(mapping = aes(x = name, y = value)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(x = NULL, y = "Distance") +
+  scale_x_discrete(labels = c("Observed to\n$\\langle M_xM_y\\rangle$",
+                              "Observed to\n$\\langle M_xL_y\\rangle$",
+                              "Observed to\n$\\langle L_xM_y\\rangle$",
+                              "Observed to\n$\\langle L_xL_y\\rangle$"))
+```
+
+## Constant mixing models
+
+```{r}
+#| label: fig-cmmest
+#| fig-cap: Summaries of the distributions of the estimated mixing coefficients in the single- and two-dimensional constant mixing models
+#| dev: tikz
+#| fig-width: 6
+#| fig-height: 4
+#| out-width: "0.8\\linewidth"
+
+t1 <- t1 |>
+  mutate(alfa1_edu = map_dbl(cm1ded, ~.$`Mixing coefficient`$Estimate),
+         alfa2_edu = map_dbl(cm2d, ~.$`Mixing coefficient`$Estimate[1]),
+         alfa1_sex = map_dbl(cm1dsx, ~.$`Mixing coefficient`$Estimate),
+         alfa2_sex = map_dbl(cm2d, ~.$`Mixing coefficient`$Estimate[2]))
+
+# T-test of the difference between estimates of the mixing coefficients for gender in the 2D and 1D model
+
+t1_sex_diff <- with(t1, t.test(x = alfa2_sex, y = alfa1_sex, var.equal = TRUE)) |> tidy()
+
+# Boxplot of the estimates mixing coefficients
+t1 |>
+  pivot_longer(cols = starts_with("alfa"), names_to = c("model", "dimension"),
+               names_sep = "_",
+               names_transform = list(model = ~paste0(parse_number(.), "D"))) |>
+  ggplot(mapping = aes(x = dimension, y = value, colour = model)) + 
+  geom_boxplot() +
+  scale_colour_manual(values = c("#d73027", "#4575b4"), 
+                      labels = c("Single-dimensional", "Two-dimensional")) + 
+  theme_minimal() + 
+  theme(legend.position = "top") + 
+  labs(x = NULL, y = "Estimated mixing coefficient", colour = "Model") + 
+  scale_x_discrete(labels = c("Education", "Gender"))
+```
+
+@fig-cmmest summarises distributions of the estimated coefficients in the single- and two-dimensional constant mixing models. The results are shown separately for education and gender. As we can see, in the case of education, the distributions for both models are fairly similar. The median value of the estimated coefficient is `r median(t1$alfa1_edu)` in the single-dimensional model and `r median(t1$alfa2_edu)` in the two-dimensional one. Further, the medium half of the distribution ranges from `r quantile(t1$alfa1_edu, probs = 1/4)` to `r quantile(t1$alfa1_edu, probs = 3/4)` in the former and from `r quantile(t1$alfa2_edu, probs = 1/4)` to `r quantile(t1$alfa2_edu, probs = 3/4)` in the latter. The means of the distributions are also quite similar, `r mean(t1$alfa1_edu)` and `r mean(t1$alfa2_edu)`, respectively. All in all, the two-dimensional model and the relevant single-dimensional model yield similar conclusions as regards the contribution of the meritocratic principle to status allocations along education: slightly over 50% of the time, on average, these allocations are driven by meritocracy and slightly less than half of the time they are driven by lottery.
+
+As for the mixing coefficients on gender, we observe some differences between the estimates from the single- and two-dimensional models. While in both cases the distributions are positively skewed, the median value of the former is slightly lower (`r t1 |> pull(alfa1_sex) |> median()`) than the latter (`r t1 |> pull(alfa2_sex) |> median()`). In many cases, the estimates of the mixing coefficient for gender are equal to zero: `r 100 * mean(t1$alfa1_sex == 0)`% of the time in the case of the single-dimensional model, `r 100 * mean(t1$alfa2_sex == 0)`% of the time in the case of the two-dimensional one, and `r 100 * mean(t1$alfa1_sex == 0 & t1$alfa2_sex == 0)`% of the time in both cases simultaneously, which explains the skewness. Further, the spread of the former distribution is considerably narrower than the latter, their inter-quartile ranges being `r IQR(t1$alfa1_sex)` and `r IQR(t1$alfa2_sex)`, respectively. The two distributions differ also in their arithmetic means, `r mean(t1$alfa1_sex)` vs. `r mean(t1$alfa2_sex)`, respectively, the difference being statistically significant ($t_{`r t1_sex_diff$parameter`} =`r t1_sex_diff$statistic`$, $p < 0.001$). All in all, the single-dimensional model of gender-based status allocation and the two-dimensional model somewhat differ in their conclusions concerning the role of the meritocratic principle in status allocations with respect to gender, with the latter model suggesting that the allocations are more likely to be driven by meritocracy than the former.
+
+The difference between these two interpretations is due to how the two models account for the role of gender in status allocation. In the single-dimensional model, to reiterate, gender is the only basis for status allocation. In the two-dimensional model, however, gender is secondary relative to education. That is, under the latter model, gender affects status allocation but only among people who are identical on education.
+
+To put it in another way, if we pick two people at random and find out that they differ on education, both the two-dimensional model and the single-dimensional model with education as the basis of status allocation converge in predicting that the better educated person has higher chances of ending up in a higher status category. But if we pick two people at random and find out that they are of different genders, the single-dimensional model with gender as the basis for status allocation predicts the woman to have higher chances than the man of being allocated to a higher destination status, but on the basis of the two-dimensional model we won't be able to make any prediction of this kind *unless* we find out what educational credentials they have. If we knew their educational attainments, however, gender would affect the allocation process *only if* the two persons were equally educated.
+
+```{r}
+#| label: tbl-constreg
+#| tbl-cap: Regression analyses of the mixing coefficients in the one- and two-dimensional constant mixing models
+#| results: asis
+
+t1 <- t1 |>
+  mutate(cnt = fct_relevel(cnt, "PL"))
+
+list(
+  m1 = lm(alfa1_edu ~ cnt + I(year - 1992), data = t1),
+  m2 = lm(alfa2_edu ~ cnt + I(year - 1992), data = t1),
+  m3 = lm(alfa1_sex ~ cnt + I(year - 1992), data = t1),
+  m4 = lm(alfa2_sex ~ cnt + I(year - 1992), data = t1)
+) |>
+  texreg(omit = "cnt", digits = 3, 
+         custom.coef.names = c("Intercept", "Year (ref. 1992)"),
+         booktabs = TRUE, dcolumn = TRUE, use.packages = FALSE, table = FALSE,
+         custom.model.names = c("One dim", "Two dims", "One dim", "Two dims"),
+         custom.header = list("Education" = 1:2, "Gender" = 3:4),
+         custom.gof.rows = list("Country fixed effects" = rep("Yes", 4))
+         )
+```
+
+Finally, we regress the estimated mixing coefficients on time (i.e., year) to see if we can find evidence of a systematic trend in their changes over time. In other words, is there evidence that the coefficients systematically increase or decrease over time? The regression analysis helps us answer this question. We run separate regressions for mixing coefficients on gender and education as well as for coefficients from single-dimensional and two-dimensional models. Further, to take into account between-country heterogeneity, we include country fixed effects in the models (although we do not report them among results in @tbl-constreg to save space). As in @karpinski2023, we set Poland as the reference country.[^2] Given that period which our data cover begins in 1992, we set that year to 0. Our primary interest is in the effect of year.
+
+[^2]: This just a symbolic homage to Tadeusz Krauze and Kazimierz M. Słomczyński, two great Polish sociologists who set out the work on formal modelling of status allocation processes.
+
+In @tbl-constreg, the effect is consistently positive in the case of education and negative in the case of gender. More specifically, our results imply that the mixing coefficients on education were systematically increasing in the period under study by 0.003 each year, on average, regardless of whether we consider the mixing coefficients from the one-dimensional or two-dimensional model. As regards gender, the mixing coefficients from the single-dimensional model were decreasing in the period of interest by 0.002 per year, on average. The mixing coefficients on gender in the two-dimensional model, in turn, were also decreasing, but the effect is too small to reach statistical significance.
+
+The differing results concerning time trends in the mixing coefficient on gender in the single- and two-dimensional models are, again, due to conceptual differences between them in how they account for the role of gender in status allocation. Recall that in the two-dimensional model gender is a secondary basis for status allocation, which means that allocation to destination statuses is first determined on the basis of educational credentials and only then, within educational categories, gender comes into play as an additional basis for status allocation. This is to say that, in the two-dimensional model, the mixing coefficient on gender is not confounded by the association between gender and education. 
+
+## Differential mixing models
+
+Let us now turn to the results from the differential mixing model. @fig-dmmest compares differential mixing coefficients in the two-dimensional model with those in the relevant single-dimensional one. The figure is split into two panels, the left one showing the results concerning education and the right one concerning gender. Again, we use box-and-whiskers plots to summarise the distributions of the estimated coefficients.
+
+```{r}
+#| label: fig-dmmest
+#| fig-cap: Summaries of the distributions of the estimated mixing coeﬀicients in the single- and two-dimensional differential mixing models
+#| dev: tikz
+#| fig-width: 6
+#| fig-height: 4
+#| out-width: "0.8\\linewidth"
+
+dm1ded <- t1 |>
+  mutate(dcoef1_edu = map(dm1ded, ~tibble(term = c("High", "Medium", "Low"),
+                                          theta= .$`Mixing coefficient`$Estimate))) |>
+  select(year, cnt, dcoef1_edu) |>
+  unnest(cols = dcoef1_edu)
+
+dm1dsx <- t1 |>
+  mutate(dcoef1_sex = map(dm1dsx, ~tibble(term = c("Female", "Male"),
+                                          theta= .$`Mixing coefficient`$Estimate))) |>
+  select(year, cnt, dcoef1_sex) |>
+  unnest(cols = dcoef1_sex)
+
+dm2d <- t1 |>
+  mutate(dcoef2 = map(dm2d, ~tibble(term = .$`Mixing coefficient`$term,
+                                    theta= .$`Mixing coefficient`$estimate))) |>
+  select(year, cnt, dcoef2) |>
+  unnest(cols = dcoef2)
+
+dmcoef <- bind_rows(dm1ded, dm1dsx, dm2d, .id = "model") |>
+  mutate(model = ifelse(model %in% 1:2, "Single-dimensional", "Two-dimensional"),
+         term = str_remove(string = term, pattern = "Dim [12]: "),
+         term = fct_recode(term, "Female" = "F", "Male" = "M"),
+         term = fct_relevel(term, "High", "Medium", "Low", "Female", "Male"),
+         dimension = ifelse(term %in% c("Male", "Female"), "Gender", "Education"))
+
+dmmiss <- dmcoef |>
+  group_by(term, model) |>
+  summarise(m = mean(theta == 0), .groups = "drop")
+
+dmmean <- dmcoef |>
+  group_by(term, model) |>
+  summarise(m = mean(theta), .groups = "drop")
+
+dmcoef |>
+  ggplot(mapping = aes(x = term, y = theta, colour = model)) + 
+  geom_boxplot() + 
+  facet_wrap(~dimension, scales = "free_x") + 
+  scale_colour_manual(values = c("#d73027", "#4575b4")) + 
+  theme_minimal() + 
+  theme(legend.position = "top") + 
+  labs(x = NULL, y = "Mixing coefficient", colour = "Model")
+
+```
+
+As regards education, the mixing coefficients are the highest in the top education category. That is, the median value of the mixing coefficient for that category, taken over all populations (as defined by the country-year combinations), is `r with(filter(.data = dmcoef, term == "High", model == "Single-dimensional"), median(theta))` according to the single-dimensional model and `r with(filter(.data = dmcoef, term == "High", model == "Two-dimensional"), median(theta))` according to the two-dimensional one. The middle half of all populations has mixing coefficients ranging from `r with(filter(.data = dmcoef, term == "High", model == "Single-dimensional"), quantile(theta, probs = 0.25))` to `r with(filter(.data = dmcoef, term == "High", model == "Single-dimensional"), quantile(theta, probs = 0.75))` in the former model and from `r with(filter(.data = dmcoef, term == "High", model == "Two-dimensional"), quantile(theta, probs = 0.25))` to `r with(filter(.data = dmcoef, term == "High", model == "Two-dimensional"), quantile(theta, probs = 0.75))` in the latter. In the medium education category, in turn, the median value of the mixing coefficient is equal to 0 in both models, but the distributions of the mixing coefficients differ considerably across them. More specifically, in the single-dimensional model, the mixing coefficient for the middle category is estimated at zero `r with(filter(.data = dmcoef, term == "Medium", model == "Single-dimensional"), 100 * mean(theta == 0))`% of them time, whereas in the two-dimensional model the corresponding figure is `r with(filter(.data = dmcoef, term == "Medium", model == "Two-dimensional"), 100 * mean(theta == 0))`%. Put differently, the distribution of the estimated coefficients in the two-dimensional model, its middle half ranging from 0 to `r with(filter(.data = dmcoef, term == "Medium", model == "Two-dimensional"), quantile(theta, probs = 0.75))`, has a much wider spread than in the single-dimensional one, which is nearly completely concentrated at 0. As a result, the means of the distributions differ substantially across the two models, the mean for the single-dimensional model equal to `r with(filter(.data = dmcoef, term == "Medium", model == "Single-dimensional"), mean(theta))` and that for the two-dimensional one equal to `r with(filter(.data = dmcoef, term == "Medium", model == "Two-dimensional"), mean(theta))`. Finally, the mixing coefficients in the low education category are higher, on average, than in the middle one, but lower than in the top one. Median values of the mixing coefficient are similar in the single- and two-dimensional model, `r with(filter(.data = dmcoef, term == "Low", model == "Single-dimensional"), median(theta))` and `r with(filter(.data = dmcoef, term == "Low", model == "Two-dimensional"), median(theta))`, respectively, but in the latter the distribution has a wider spread.
+
+As for gender, it is interesting to see that the mixing coefficients for women and men are pretty similar in the single-dimensional model, but they differ substantially according to the two-dimensional one. That is, in the latter, the median value of the coefficient for women is `r dmcoef |> filter(model == "Two-dimensional", dimension == "Gender", term == "Female") |> pull(theta) |> median()` and for men it is `r dmcoef |> filter(model == "Two-dimensional", dimension == "Gender", term == "Male") |> pull(theta) |> median()`. Also, the arithmetic mean of the coefficient for women is `r dmcoef |> filter(model == "Two-dimensional", dimension == "Gender", term == "Female") |> pull(theta) |> mean()` and for men it is `r dmcoef |> filter(model == "Two-dimensional", dimension == "Gender", term == "Male") |> pull(theta) |> mean()`. Thus, while the single-dimensional model implies that the contribution of the meritocracy principle to status allocation is the same for men and women, the two-dimensional model suggests that the allocation of men is driven by meritocracy to a somewhat greater extent than women.
+
+```{r}
+#| results: asis
+
+dmcoef <- dmcoef |>
+  mutate(cnt = fct_relevel(cnt, "PL"))
+
+t2 <- dmcoef |>
+  group_by(model, dimension, term) |>
+  nest()
+
+t2 <- t2 |>
+  mutate(m1 = map(data, ~lm(theta ~ cnt + I(year - 1992), data = .)))
+
+texreg(l = t2$m1[c(1, 6, 2, 7, 3, 8, 4, 9, 5, 10)],
+       omit = "cnt", digits = 3, 
+       custom.coef.names = c("Intercept", "Year (ref. 1992)"),
+       booktabs = TRUE, dcolumn = TRUE, use.packages = FALSE, table = TRUE,
+       sideways = TRUE, caption = "Regression analyses of the mixing coefficients in
+       the one- and two-dimensional differential mixing models", caption.above = TRUE,
+       custom.model.names = rep(c("One dim", "Two dims"), times = 5),
+       custom.header = list("Education: High" = 1:2, "Education: Medium" = 3:4, 
+                            "Education: Low" = 5:6, "Gender: Female" = 7:8, 
+                            "Gender: Male" = 9:10), scalebox = 0.8,
+       custom.gof.rows = list("Country FE" = rep("Yes", 10)))
+```
+
+# References
