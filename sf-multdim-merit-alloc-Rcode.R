@@ -1,3 +1,4 @@
+library(stat.alloc)
 library(tidyverse)
 library(knitr)
 library(reshape2)
@@ -6,8 +7,6 @@ library(gghalves)
 library(Hmisc)
 library(broom)
 library(texreg)
-
-source("stat-alloc-in-2D-custom-fns.R")
 
 # TABLE 1 IN THE TEXT ----
 
@@ -28,7 +27,7 @@ t1 <- t1 |>
 
 # Calculating the reference allocations (assuming women to be ranked over men) ----
 
-t1_ref <- stall2d(d = t1, dim1 = "degree", dim2 = "sex", status = "status", f = "freq")
+t1_ref <- refall2d(d = t1, dim1 = "degree", dim2 = "sex", status = "status", f = "freq")
 
 # Calculating the index of dissimilarity between each of the reference allocations and the observed one
 
@@ -42,7 +41,7 @@ t1_dist <- map_dbl(.x = t1_ref[-1], .f = ~norm(t1_ref[[1]] - ., type = "F"))
 
 t1_ref_alt <- t1 |> 
   mutate(sex2 = fct_relevel(sex, "M")) |> 
-  stall2d(dim1 = "degree", dim2 = "sex2", status = "status", f = "freq")
+  refall2d(dim1 = "degree", dim2 = "sex2", status = "status", f = "freq")
 
 # Calculating the index of dissimilarity between each of the reference allocations and the observed one
 
@@ -56,7 +55,7 @@ t1_dist_alt <- map_dbl(.x = t1_ref_alt[-1], .f = ~norm(t1_ref_alt[[1]] - ., type
 
 latex(addmargins(t1_ref[[1]]), file = "", title = "", cgroup = c("Status", ""), n.cgroup = c(4, 1), rgroup = c("Origin", ""), n.rgroup = c(10, 1), big.mark = ",", booktabs = TRUE, insert.bottom = "\\medskip\\footnotesize{\\emph{Destination statuses} S1: Professional, technical and kindred workers; Managers and administrators, except farm; S2: Sales workers; Clerical and kindred workers; S3: Craft and kindred workers; Operatives, except transport; Transport equipment operatives; Service workers, except household; S4: Laborers, except farm; Farm workers; Private household workers. \\emph{Educational levels} E1: College, 4 years or more; E2: College, 1-3 years; E3: High school, 4 years; E4: High school, 1-3 years; E5: Elementary school, 8 years or less. \\emph{Genders}  M: Male; F: Female.}", table.env = FALSE)
 
-# TABLE 1 IN THE TEXT ----
+# TABLE 2 IN THE TEXT ----
 
 # Matrices representing the four reference allocations
 
@@ -72,24 +71,24 @@ kable(t1_ref[[5]], booktabs = TRUE, linesep = "", format.args = list(big.mark = 
 # Education-based status-allocation ----
 
 t1_cmm_edu <- xtabs(freq ~ degree + status, data = t1) |>
-  mar() |>
-  merit1()
+  refall() |>
+  cmm_mde()
 
 # Gender-based status-allocation ----
 
 t1_cmm_sex <- xtabs(freq ~ sex + status, data = t1) |>
-  mar() |>
-  merit1()
+  refall() |>
+  cmm_mde()
 
 # Two-dimensional status allocation model ----
 
 # Reference allocations
 
 t1_stall2d <- t1 |>
-  stall2d(dim1 = "degree", dim2 = "sex", status = "status", f = "freq")
+  refall2d(dim1 = "degree", dim2 = "sex", status = "status", f = "freq")
 
 # Fitting the model
-t1_cmm2d <- cmm2d(dat = t1_stall2d)
+t1_cmm2d <- cmm2d_mde(dat = t1_stall2d)
 
 # Fit comparison between 1D and 2D models ---
 
@@ -236,8 +235,8 @@ fig.dU |>
   theme_bw() + 
   theme(legend.position = "top") + 
   scale_x_continuous(breaks = seq(from = 1990, to = 2023, by = 3)) + 
-  scale_colour_manual(values = c("#762a83", "#1b7837"), labels = c("Education", "Status")) + 
-  scale_fill_manual(values = c("#762a83", "#1b7837"), labels = c("Education", "Status")) + 
+  scale_colour_manual(values = c("#0C7BDC", "#FFC20A"), labels = c("Education", "Status")) + 
+  scale_fill_manual(values = c("#0C7BDC", "#FFC20A"), labels = c("Education", "Status")) + 
   labs(x = "Year", y = "Average $\\Delta U$", colour = "Dimension", fill = "Dimension")
 
 # FIGURE 2 IN THE TEXT ----
@@ -251,8 +250,8 @@ d <- d |>
                                 mlh = .[c(2, 3, 1), ],
                                 lhm = .[c(3, 1, 2), ],
                                 lmh = .[3:1, ])),
-         sa1ded_prm = map(tb1ded_prm, ~map(., mar)),
-         cm1ded_prm = map(sa1ded_prm, ~map(., merit1)))
+         sa1ded_prm = map(tb1ded_prm, ~map(., refall)),
+         cm1ded_prm = map(sa1ded_prm, ~map(., cmm_mde)))
 
 d <- d |>
   mutate(cm1ded_prm = map(cm1ded_prm, ~map_df(., ~.[[3]])))
@@ -264,8 +263,8 @@ d <- d |>
                             f = .,
                             m = .[2:1, ]
                           )),
-         sa1dsx_prm = map(tb1dsx_prm, ~map(., mar)),
-         cm1dsx_prm = map(sa1dsx_prm, ~map(., merit1)))
+         sa1dsx_prm = map(tb1dsx_prm, ~map(., refall)),
+         cm1dsx_prm = map(sa1dsx_prm, ~map(., cmm_mde)))
 
 d <- d |>
   mutate(cm1dsx_prm = map(cm1dsx_prm, ~map_df(., ~.[[3]])))
@@ -308,7 +307,7 @@ bind_rows(ed_prm, sx_prm, .id = "dim") |>
 # FIGURE 3 IN THE TEXT ----
 
 d <- d |>
-  mutate(sa2d = map(data, ~stall2d(d = ., f = "freq", dim1 = "degree", dim2 = "sex", status = "status")),
+  mutate(sa2d = map(data, ~refall2d(d = ., f = "freq", dim1 = "degree", dim2 = "sex", status = "status")),
          dist = map(.x = sa2d, .f = ~map2(.x = .[1], 
                                           .y = .[-1], 
                                           .f = ~norm(.x - .y, type = "f")/sum(.x))))
@@ -336,18 +335,18 @@ d |>
 # FIGURE 4 IN THE TEXT ----
 
 d <- d |>
-  mutate(sa1ded = map(tb1ded, mar),
-         cm1ded = map(sa1ded, merit1),
-         sa1dsx = map(tb1dsx, mar),
-         cm1dsx = map(sa1dsx, merit1),
+  mutate(sa1ded = map(tb1ded, refall),
+         cm1ded = map(sa1ded, cmm_mde),
+         sa1dsx = map(tb1dsx, refall),
+         cm1dsx = map(sa1dsx, cmm_mde),
          tb1dsx_alt = map(tb1dsx, ~.[2:1, ]),
-         sa1dsx_alt = map(tb1dsx_alt, mar),
-         cm1dsx_alt = map(sa1dsx_alt, merit1),
-         sa2d = map(data, ~stall2d(d = ., f = "freq", dim1 = "degree", dim2 = "sex", status = "status")),
-         cm2d = map(sa2d, cmm2d),
+         sa1dsx_alt = map(tb1dsx_alt, refall),
+         cm1dsx_alt = map(sa1dsx_alt, cmm_mde),
+         sa2d = map(data, ~refall2d(d = ., f = "freq", dim1 = "degree", dim2 = "sex", status = "status")),
+         cm2d = map(sa2d, cmm2d_mde),
          data = map(data, ~mutate(.data = ., sex1 = fct_relevel(sex, "M", "F"))),
-         sa2d_alt = map(data, ~stall2d(d = ., f = "freq", dim1 = "degree", dim2 = "sex1", status = "status")),
-         cm2d_alt = map(sa2d_alt, cmm2d),
+         sa2d_alt = map(data, ~refall2d(d = ., f = "freq", dim1 = "degree", dim2 = "sex1", status = "status")),
+         cm2d_alt = map(sa2d_alt, cmm2d_mde),
          alfa1_edu = map_dbl(cm1ded, ~.$`Mixing coefficient`$Estimate),
          alfa2_edu = map_dbl(cm2d, ~.$`Mixing coefficient`$Estimate[1]),
          alfa1_sex = map_dbl(cm1dsx, ~.$`Mixing coefficient`$Estimate),
@@ -365,9 +364,9 @@ d |>
   ggplot(mapping = aes(x = dimension, y = value, colour = model, fill = model)) + 
   geom_half_boxplot(alpha = 0.5) +
   geom_half_violin(alpha = 0.5, side = "r", show.legend = FALSE) +
-  scale_colour_manual(values = c("#762a83", "#1b7837"), 
+  scale_colour_manual(values = c("#0C7BDC", "#FFC20A"), 
                       labels = c("Single-dimensional", "Two-dimensional")) + 
-  scale_fill_manual(values = c("#762a83", "#1b7837"), 
+  scale_fill_manual(values = c("#0C7BDC", "#FFC20A"), 
                     labels = c("Single-dimensional", "Two-dimensional")) + 
   theme_minimal() + 
   theme(legend.position = "top") + 
